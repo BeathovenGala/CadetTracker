@@ -4,4 +4,4 @@ const app=express();
 const mongoose =require("mongoose");
 
 
-console.log();
+console.log("hello world");
