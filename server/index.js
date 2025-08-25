@@ -3,6 +3,8 @@
 
 const express=require('express'); //we'll import the server
 const app=express();    //our server instance
+const mongoose=require('mongoose');//import mongoose e.g. translator for monogDB
+const mongo_url='mongodb://localhost:27017/cadet-tracker';
 
 app.use(express.json());//middleware to handle json data
 
@@ -18,7 +20,7 @@ app.get('/',(req,res)=>{ //here the handler says  a route handler's job is to ta
 });
 
 //route for login
-app.get('/login',(req,res)=>{
+app.post('/login',(req,res)=>{
      //get data from frontend
      const {regimentalNo,password}=req.body; // in future we'll verify to Db
     console.log('login attempt:', {regimentalNo,password});
@@ -26,13 +28,15 @@ app.get('/login',(req,res)=>{
 });
 
 //route for registration
-app.get('/register',()=>{
+app.post('/register',()=>{
     //get cadet data
     const cadetData= req.body;
     //print data in console
     console.log('Reistration Succesful.', {cadetData});
     res.status(201).json({message: `Registration rcvd`});//future we'll verify via email
 });
+
+
 
 //Start the server and make it listen for incoming requests.    (port and handler)
 app.listen(PORT,()=>{
