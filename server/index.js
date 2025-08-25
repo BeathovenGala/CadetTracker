@@ -36,9 +36,17 @@ app.post('/register',()=>{
     res.status(201).json({message: `Registration rcvd`});//future we'll verify via email
 });
 
+mongoose.connect(mongo_url)
+    .then(()=>{
+        console.log('Db Connection succesful');
 
+         //Start the server and make it listen for incoming requests.    (port and handler)
+         app.listen(PORT,()=>{
+                       console.log(`server is running on http://localhost:${PORT}`);//use backticks not single quotes
+          });
 
-//Start the server and make it listen for incoming requests.    (port and handler)
-app.listen(PORT,()=>{
-    console.log(`server is running on http://localhost:${PORT}`);//use backticks not single quotes
-});
+    })
+    .catch(err => {
+        console.log('Connection failed',err);
+    });
+
