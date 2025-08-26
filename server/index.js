@@ -31,24 +31,17 @@ app.post('/login',async(req,res)=>{
 
         if(!cadet){
              res.status(404).json({message: 'Cadet not found'});
+        }     
          //password check
-         if(cadet){
-             if(cadet.password !== password){
-                 // For now, we'll do a simple password check.
-                 // In a real app, we would hash and compare passwords.
-                 return res.status(401).json({message: 'Incorrect password'});
+         const isMatch = await bcrypt.compare(password,cadet.password);
+         
+             if(!isMatch){   // If the passwords don't match, send an unauthorized response and exit.
+                return res.status(401).json({message: 'Incorrect password'});
                }
-             else {  // If the cadet is found and the password is correct, send a success message.
-                return res.status(200).json({message: 'Login succesful',cadet});
-             }
-
-
-            }    
-
+              // If the cadet is found and the password is correct, send a success message.
+                    res.status(200).json({ message: 'Login successful!', cadet });
         }
-
-
-    } catch (err) {
+     catch (err) {
         //to handle errors that occur while looking for data within the server
         console.error('Login error',err);
         res.status(500).json({message: 'Internal server error'})
@@ -64,7 +57,7 @@ app.post('/register',async(req,res)=>{
         //get cadet data
         const cadetData= req.body;
         const newCadet= new Cadet(cadetData);
-        await newCadet,save();
+        await newCadet.save();
         console.log('new cadet is reigstered');  
         res.status(201).json({message: `Registration rcvd`,
                               cadet: newCadet,

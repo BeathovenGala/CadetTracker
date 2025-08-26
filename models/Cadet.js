@@ -2,7 +2,7 @@
 //steps 1(import),2(schema),3(create and export)
 //import mongoose
 const mongoose = require('mongoose');
-const bycrypt =require('bcryptjs');
+const bcrypt =require('bcryptjs');
 //Define the schema for our Cadet data
 // A schema defines the structure, data types, and validation rules for our documents.
 const CadetSchema=new mongoose.Schema({
@@ -59,11 +59,11 @@ CadetSchema.pre('save',async function(next) { // We use a pre-save hook to ensur
     try {
          // Generate a salt. A salt is a random string added to the password
         // to make the hash unique, even for the same password.
-        const salt = await bycrypt.genSalt(10);
-        this.password = await bycrypt.hash(this.password,salt);
+        const salt = await bcrypt.genSalt(10);
+        this.password = await bcrypt.hash(this.password,salt);
         next();
     } catch (err) {
-        next(err);//send s error to the try catch of index.js
+        next(err);//send s error to the try catch of
         
     }
 });
