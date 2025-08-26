@@ -2,9 +2,10 @@
 //5 steps  1(import),2(instance),3(define port),4(define route and send default response),5(start server and listen for reqs),6(set new routes)
 
 const express=require('express'); //we'll import the server
-const app=express();    //our server instance
 const mongoose=require('mongoose');//import mongoose e.g. translator for monogDB
 const mongo_url='mongodb://localhost:27017/cadet-tracker';
+const app=express();    //our server instance
+const Cadet=require('C:\\Users\\nseg.lcl\\Documents\\CadetTracker\\models\\Cadet.js');
 
 app.use(express.json());//middleware to handle json data
 
@@ -20,22 +21,65 @@ app.get('/',(req,res)=>{ //here the handler says  a route handler's job is to ta
 });
 
 //route for login
-app.post('/login',(req,res)=>{
+app.post('/login',async(req,res)=>{
      //get data from frontend
-     const {regimentalNo,password}=req.body; // in future we'll verify to Db
-    console.log('login attempt:', {regimentalNo,password});
-    res.status(200).json({message: `login request recived.`});
+    try {
+        const {regimentalNo,password}=req.body; // in future we'll verify to Db
+     //    console.log('login attempt:', {regimentalNo,password});
+     //    res.status(200).json({message: `login request recived.`});
+        const cadet= await Cadet.findOne({regimentalNo}); // Use the Mongoose 'findOne' method to search for a cadet by their regimental number.    
+
+        if(!cadet){
+             res.status(404).json({message: 'Cadet not found'});
+         //password check
+         if(cadet){
+             if(cadet.password !== password){
+                 // For now, we'll do a simple password check.
+                 // In a real app, we would hash and compare passwords.
+                 return res.status(401).json({message: 'Incorrect password'});
+               }
+             else {  // If the cadet is found and the password is correct, send a success message.
+                return res.status(200).json({message: 'Login succesful',cadet});
+             }
+
+
+            }    
+
+        }
+
+
+    } catch (err) {
+        //to handle errors that occur while looking for data within the server
+        console.error('Login error',err);
+        res.status(500).json({message: 'Internal server error'})
+
+     } 
 });
 
 //route for registration
-app.post('/register',()=>{
-    //get cadet data
-    const cadetData= req.body;
+app.post('/register',async(req,res)=>{
     //print data in console
-    console.log('Reistration Succesful.', {cadetData});
-    res.status(201).json({message: `Registration rcvd`});//future we'll verify via email
+    // console.log('Reistration Succesful.', {cadetData});
+    try {
+        //get cadet data
+        const cadetData= req.body;
+        const newCadet= new Cadet(cadetData);
+        await newCadet,save();
+        console.log('new cadet is reigstered');  
+        res.status(201).json({message: `Registration rcvd`,
+                              cadet: newCadet,
+        });//future we'll verify via email
+        
+    } catch (err) {
+        // If there's an error (e.g., regimentalNo already exists), we catch it here.
+        console.error('Registration error:', err);
+        res.status(400).json({message: 'Registration failed', error:err.message});
+        //400 for bad request
+    }
 });
 
+
+//to ensure Database connection
 mongoose.connect(mongo_url)
     .then(()=>{
         console.log('Db Connection succesful');
