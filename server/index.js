@@ -3,11 +3,12 @@
 
 const express=require('express'); //we'll import the server
 const mongoose=require('mongoose');//import mongoose e.g. translator for monogDB
-const mongo_url='mongodb://localhost:27017/cadet-tracker';
+const mongo_url='mongodb://localhost:27017/cadet-tracker'; // double slashes to escape the escape character
 const app=express();    //our server instance
 const Cadet=require('C:\\Users\\nseg.lcl\\Documents\\CadetTracker\\models\\Cadet.js');
+const Admin=require('C:\\Users\\nseg.lcl\\Documents\\CadetTracker\\models\\Admin.js');
 const jwt=require('jsonwebtoken');
-const { protect } = require('C:\\Users\\nseg.lcl\\Documents\\CadetTracker\\Utils\\authMiddleware.js');
+const { protect ,adminProtect } = require('C:\\Users\\nseg.lcl\\Documents\\CadetTracker\\Utils\\authMiddleware.js');
 
 app.use(express.json());//middleware to handle json data
 
@@ -66,6 +67,7 @@ app.post('/register',async(req,res)=>{
         // will automatically hash the password before saving.
         await newCadet.save();
         console.log('New cadet is registered');  
+        const token = generateToken(newCadet._id, 'cadet'); // Pass the role
         res.status(201).json({message: `Registration rcvd`,
                               cadet: newCadet,
         });//future we'll verify via email
@@ -78,6 +80,29 @@ app.post('/register',async(req,res)=>{
     }
 });
 
+app.post('/admin/login',async(req,res)=>{
+    try {
+        //1(we'll take user pass),2(does admin already exist),3(if found check password),4(login enter )
+        const {username,password}= req.body;
+         const admin = await Admin.findOne({ username }); //2
+         //if not saved in hash table
+         if (!admin) return res.status(404).json({ message: 'Admin not found.' });
+
+         const isMatch = await bcrypt.compare(password, admin.password);
+        if (!isMatch) return res.status(401).json({ message: 'Incorrect password.' });
+        const token = generateToken(admin._id, 'admin'); // Pass the role
+
+        res.status(200).json({ message: 'Admin login successful!', token });
+        
+        
+    } catch (err) {
+        console.error('Admin login error:',err);
+        res.status(500).json({message: 'Internal server error'});
+        
+    }
+});
+
+//Protected routes
 app.get('/cadet/dashboard', protect, (req, res) => {
     // If we reach this code, it means the token was valid
     // The cadet's ID is available on req.user from the middleware

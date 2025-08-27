@@ -32,5 +32,13 @@ const protect = (req, res, next) => {
     }
 };
 
-
-module.exports = { protect };
+const adminProtect = (req, res, next) => {
+    // We can rely on the 'protect' middleware to run first.
+    // If we reach this point, the token is valid, and we just need to check the role.
+    if (req.user && req.user.role === 'admin') {
+        next();
+    } else {
+        res.status(403).json({ message: 'Forbidden: Admin access required.' });
+    }
+};
+module.exports = { protect,adminProtect };
