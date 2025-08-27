@@ -78,6 +78,11 @@ app.post('/register',async(req,res)=>{
     }
 });
 
+app.get('/cadet/dashboard', protect, (req, res) => {
+    // If we reach this code, it means the token was valid
+    // The cadet's ID is available on req.user from the middleware
+    res.status(200).json({ message: 'Welcome to the dashboard!', userId: req.user, }); // We'll use this ID to fetch the cadet's data from the database later.
+});
 
 //to ensure Database connection
 mongoose.connect(mongo_url)
