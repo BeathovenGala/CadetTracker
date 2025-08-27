@@ -102,6 +102,8 @@ app.post('/admin/login',async(req,res)=>{
     }
 });
 
+app.use('/api/admin', adminRoutes);
+
 //Protected routes
 app.get('/cadet/dashboard', protect, (req, res) => {
     // If we reach this code, it means the token was valid
