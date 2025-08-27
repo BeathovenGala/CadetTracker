@@ -11,6 +11,7 @@ const ParadeSchema = new mongoose.Schema({
         type: Date,
         required: true,
     },
+    
     location: {
         latitude: {
             type: Number,
@@ -20,6 +21,11 @@ const ParadeSchema = new mongoose.Schema({
             type: Number,
             required: true,
         },
+    },
+     qrCodeId: {
+        type: String,
+        required: true,
+        unique: true,
     },
     // We'll store a list of cadets who attended this parade.
     // This is a list of references to the Cadet model.
