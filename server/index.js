@@ -9,6 +9,7 @@ const Cadet=require('C:\\Users\\nseg.lcl\\Documents\\CadetTracker\\models\\Cadet
 const Admin=require('C:\\Users\\nseg.lcl\\Documents\\CadetTracker\\models\\Admin.js');
 const jwt=require('jsonwebtoken');
 const { protect ,adminProtect } = require('C:\\Users\\nseg.lcl\\Documents\\CadetTracker\\Utils\\authMiddleware.js');
+const adminRoutes = require('C:\\Users\\nseg.lcl\\Documents\\CadetTracker\\routes\\admin\\adminRoutes.js');
 
 app.use(express.json());//middleware to handle json data
 
