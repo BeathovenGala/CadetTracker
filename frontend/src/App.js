@@ -15,7 +15,7 @@ export default function App() {
     }
   }, []);
 
-  const API_URL = 'http://localhost:3000';
+  const API_URL = 'http://localhost:5000';
 
   /**
    * Handles user login by making a POST request to the backend.
@@ -49,6 +49,7 @@ export default function App() {
    * @param {object} data - The new cadet's registration details.
    */
   const handleRegister = async (data) => {
+    console.log('Data being sent to server:', data);//checker
     try {
       const response = await fetch(`${API_URL}/register`, {
         method: 'POST',

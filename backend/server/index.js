@@ -1,5 +1,11 @@
 //Setting server side firstly
 //5 steps  1(import),2(instance),3(define port),4(define route and send default response),5(start server and listen for reqs),6(set new routes)
+// Loading env vars
+const dotenv = require('dotenv'); // Import dotenv
+const path = require('path');
+dotenv.config({ path: path.resolve(__dirname, '..', '.env') });///telling the program exactly where to look for the .env file
+console.log('Resolved .env path:', path.resolve(__dirname, '..', '.env'));
+console.log('MONGO_URI from environment:', process.env.MONGO_URI);
 
 const express=require('express'); //we'll import the server
 const mongoose=require('mongoose');//import mongoose e.g. translator for monogDB
@@ -7,17 +13,16 @@ const bcrypt = require('bcryptjs');
 const jwt=require('jsonwebtoken');
 const generateToken = require('../Utils/generateToken');
 const { protect, adminProtect } = require('../utils/authMiddleware.js'); 
-const dotenv = require('dotenv'); // Import dotenv
+const cors = require('cors');
 
-// Loading env vars
-dotenv.config();
 
 // Importing the routes
 const adminRoutes = require('../routes/admin/adminRoutes');
-const cadetRoutes = require('../routes/admin/attendanceRoutes');
+const cadetRoutes = require('../routes/cadet/attendanceRoutes');
 // Create the express application
 const app = express();
 app.use(express.json()); //middleware to handle json data
+app.use(cors()); // to enable CORS
 
 // Importing our Cadet and Admin models
 const Cadet = require('../models/Cadet');
@@ -33,7 +38,7 @@ const PORT=process.env.PORT || 3000; //declaring constant variable named PORT an
 
 
 //to ensure Database connection
-mongoose.connect(mongo_url)
+mongoose.connect(MONGO_URI)
     .then(()=>{
         console.log('Db Connection succesful');
 
