@@ -1,12 +1,12 @@
-// routes/cadet/attendanceRoutes.js
+
 
 const express = require('express');
-const { protect } = require('C:\\Users\\nseg.lcl\\Documents\\CadetTracker\\Utils\\authMiddleware.js');
-const Parade = require('C:\\Users\\nseg.lcl\\Documents\\CadetTracker\\models\\Parade.js');
+const { protect } = require('../../utils/authMiddleware.js');
+const Parade = require('../../models/Parade');
 
 const router = express.Router();
-const { getDistance } = require('C:\\Users\\nseg.lcl\\Documents\\CadetTracker\\Utils\\functions\\getDistance.js');
-const { deg2rad } = require('C:\\Users\\nseg.lcl\\Documents\\CadetTracker\\Utils\\functions\\deg2rad.js');
+const { getDistance } = require('../../utils/functions/getDistance.js');
+const { deg2rad } = require('../../utils/functions/deg2rad.js');
 
 router.post('/attendance', protect, async (req, res) => {
     try {

@@ -36,6 +36,11 @@ const CadetSchema=new mongoose.Schema({
         required: true,
         trim: true,
     },
+     gender: {
+        type: String,
+        required: true,
+        enum: ['SD', 'SW'], // This ensures only 'SD' or 'SW' are valid values
+    },
     year: {
         type: String,
         required: true,

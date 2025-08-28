@@ -1,9 +1,9 @@
 
 
 const express = require('express');
-const { protect ,adminProtect } = require('C:\\Users\\nseg.lcl\\Documents\\CadetTracker\\Utils\\authMiddleware.js');
+const { protect ,adminProtect } = require('../../utils/authMiddleware.js');
  // Path changed to reflect new folder depth
-const paradeRoutes = require('./paradeRoutes'); // Correct path because both files are in the same folder
+const paradeRoutes = require('./paradeRoutes.js'); // Correct path because both files are in the same folder
 
 const router = express.Router();
 

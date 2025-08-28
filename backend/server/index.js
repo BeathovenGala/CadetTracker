@@ -3,20 +3,54 @@
 
 const express=require('express'); //we'll import the server
 const mongoose=require('mongoose');//import mongoose e.g. translator for monogDB
-const mongo_url='mongodb://localhost:27017/cadet-tracker'; // double slashes to escape the escape character
-const app=express();    //our server instance
-const Cadet=require('C:\\Users\\nseg.lcl\\Documents\\CadetTracker\\models\\Cadet.js');
-const Admin=require('C:\\Users\\nseg.lcl\\Documents\\CadetTracker\\models\\Admin.js');
+const bcrypt = require('bcryptjs');
 const jwt=require('jsonwebtoken');
-const { protect ,adminProtect } = require('C:\\Users\\nseg.lcl\\Documents\\CadetTracker\\Utils\\authMiddleware.js');
-const adminRoutes = require('C:\\Users\\nseg.lcl\\Documents\\CadetTracker\\routes\\admin\\adminRoutes.js');
+const generateToken = require('../Utils/generateToken');
+const { protect, adminProtect } = require('../utils/authMiddleware.js'); 
+const dotenv = require('dotenv'); // Import dotenv
 
-app.use(express.json());//middleware to handle json data
+// Loading env vars
+dotenv.config();
+
+// Importing the routes
+const adminRoutes = require('../routes/admin/adminRoutes');
+const cadetRoutes = require('../routes/admin/attendanceRoutes');
+// Create the express application
+const app = express();
+app.use(express.json()); //middleware to handle json data
+
+// Importing our Cadet and Admin models
+const Cadet = require('../models/Cadet');
+const Admin = require('../models/Admin');
+
+// Connecting to mongodb
+const MONGO_URI = process.env.MONGO_URI;
+
 
 const PORT=process.env.PORT || 3000; //declaring constant variable named PORT and process.env is an object that holds users envlironment variables
                                     //Env variables--what it runs on--The program will automatically use that value.
                                    // we then or that so if no env variables we set default port
-const JWT_SECRET = 'secret_super_key' ;
+
+
+//to ensure Database connection
+mongoose.connect(mongo_url)
+    .then(()=>{
+        console.log('Db Connection succesful');
+
+         //Start the server and make it listen for incoming requests.    (port and handler)
+         app.listen(PORT,()=>{
+                       console.log(`server is running on http://localhost:${PORT}`);//use backticks not single quotes
+          });
+
+    })
+    .catch(err => {
+        console.log('Connection failed',err);
+    });
+
+    // Use the new admin routes module
+app.use('/api/admin', adminRoutes);//any request starting with /api/admin should be handled by the code inside the adminRoutes file
+app.use('/api/cadet', cadetRoutes);
+
 ////Route for url
 // app.get is receptionist 
 // app variable represents the entire app
@@ -103,7 +137,7 @@ app.post('/admin/login',async(req,res)=>{
     }
 });
 
-app.use('/api/admin', adminRoutes);
+
 
 //Protected routes
 app.get('/cadet/dashboard', protect, (req, res) => {
@@ -115,18 +149,4 @@ app.get('/cadet/dashboard', protect, (req, res) => {
     }); // We'll use this ID to fetch the cadet's data from the database later
 });
 
-//to ensure Database connection
-mongoose.connect(mongo_url)
-    .then(()=>{
-        console.log('Db Connection succesful');
-
-         //Start the server and make it listen for incoming requests.    (port and handler)
-         app.listen(PORT,()=>{
-                       console.log(`server is running on http://localhost:${PORT}`);//use backticks not single quotes
-          });
-
-    })
-    .catch(err => {
-        console.log('Connection failed',err);
-    });
 

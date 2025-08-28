@@ -1,5 +1,8 @@
 const jwt = require('jsonwebtoken');
-const JWT_SECRET = 'secret_super_key' ;
+const dotenv = require('dotenv');
+dotenv.config();
+
+const JWT_SECRET = process.env.JWT_SECRET;
 
 const protect = (req, res, next) => {
     let token;

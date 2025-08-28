@@ -1,8 +1,8 @@
 
 
 const express = require('express');
-const Parade = require('C:\\Users\\nseg.lcl\\Documents\\CadetTracker\\models\\Parade.js');
-const { protect, adminProtect } = require('../../../utils/authMiddleware');
+const Parade = require('../../models/Parade');
+const { protect, adminProtect } = require('../../utils/authMiddleware.js');
 const crypto = require('crypto');
 const router = express.Router();
 
@@ -56,12 +56,43 @@ router.get('/:id', async (req, res) => {
     try {
         const parade = await Parade.findById(req.params.id)
             .populate('createdBy', 'unitName username')
-            .populate('attendees', 'name regimentalNo');
+            .populate('attendees', 'name regimentalNo college gender');  // Populate the new college and gender fields
 
         if (!parade) {
             return res.status(404).json({ message: 'Parade not found.' });
         }
+        // Process the attendance data to generate the requested statistics
+        const attendees = parade.attendees;
+        const totalCadets = attendees.length;
 
+        // Count SDs and SWs
+        const totalSDs = attendees.filter(cadet => cadet.gender === 'SD').length;
+        const totalSWs = attendees.filter(cadet => cadet.gender === 'SW').length;
+
+        // Count cadets by college using reduce
+        const cadetsByCollege = attendees.reduce((acc, cadet) => {
+            acc[cadet.college] = (acc[cadet.college] || 0) + 1;
+            return acc;
+        }, {});
+
+        const paradeDetails = {
+            eventName: parade.eventName,
+            date: parade.date,
+            location: parade.location,
+            createdBy: parade.createdBy,
+            attendanceStats: {
+                totalCadets,
+                totalSDs,
+                totalSWs,
+                cadetsByCollege,
+            },
+            attendees: attendees.map(cadet => ({
+                name: cadet.name,
+                regimentalNo: cadet.regimentalNo,
+                college: cadet.college,
+                gender: cadet.gender
+            })),
+        };
         res.status(200).json(parade);
     } catch (error) {
         console.error('Error fetching parade:', error);
