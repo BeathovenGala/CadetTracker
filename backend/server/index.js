@@ -25,9 +25,8 @@ const app = express();
 app.use(express.json()); //middleware to handle json data
 app.use(cors()); // to enable CORS
 
-// Importing our Cadet and Admin models
-const Cadet = require('../models/Cadet');
-const Admin = require('../models/Admin');
+// Importing our common user models
+const User = require('../models/User.js');
 
 // Connecting to mongodb
 const MONGO_URI = process.env.MONGO_URI;
@@ -75,18 +74,18 @@ app.post('/login',async(req,res)=>{
         const {regimentalNo,password}=req.body; // in future we'll verify to Db
      //    console.log('login attempt:', {regimentalNo,password});
      //    res.status(200).json({message: `login request recived.`});
-        const cadet= await Cadet.findOne({regimentalNo}); // Use the Mongoose 'findOne' method to search for a cadet by their regimental number.    
+        const user= await User.findOne({regimentalNo}); // Use the Mongoose 'findOne' method to search for a cadet by their regimental number.    
 
-        if(!cadet){
+        if(!user){
             return res.status(404).json({message: 'Cadet not found'});
         }     
          //password check
-         const isMatch = await bcrypt.compare(password,cadet.password);
+         const isMatch = await bcrypt.compare(password,user.password);
          
              if(!isMatch){   // If the passwords don't match, send an unauthorized response and exit.
                 return res.status(401).json({message: 'Incorrect password'});
                }
-                const token = jwt.sign({ id: cadet._id }, JWT_SECRET, { expiresIn: '1h' });
+                 const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
               // If the cadet is found and the password is correct, send a success message.
                    return res.status(200).json({ message: 'Login successful!', token });//send token back to clinet
         }
@@ -106,13 +105,14 @@ app.post('/register',async(req,res)=>{
         //get cadet data
         console.log("Backend data received:", req.body);
         const cadetData= req.body;
-        const newCadet= new Cadet(cadetData); // Create a new instance of our Cadet model. The pre-save hook in the model
+        const newUser= new User(cadetData); // Create a new instance of our Cadet model. The pre-save hook in the model
         // will automatically hash the password before saving.
-        await newCadet.save();
+        await newUser.save();
         console.log('New cadet is registered');  
-        const token = generateToken(newCadet._id, 'cadet'); // Pass the role
-        res.status(201).json({message: `Registration rcvd`,
-                              cadet: newCadet,
+         const token = jwt.sign({ id: newUser._id, role: newUser.role }, JWT_SECRET, { expiresIn: '1h' });
+        res.status(201).json({
+            message: 'Registration successful!',
+            token: token,
         });//future we'll verify via email
         
     } catch (err) {
@@ -126,15 +126,17 @@ app.post('/register',async(req,res)=>{
 app.post('/admin/login',async(req,res)=>{
     try {
         //1(we'll take user pass),2(does admin already exist),3(if found check password),4(login enter )
-        const {username,password}= req.body;
-         const admin = await Admin.findOne({ username }); //2
-         //if not saved in hash table
-         if (!admin) return res.status(404).json({ message: 'Admin not found.' });
+         const { username, password } = req.body;
+        const user = await User.findOne({ username, role: 'admin' });
 
-         const isMatch = await bcrypt.compare(password, admin.password);
-        if (!isMatch) return res.status(401).json({ message: 'Incorrect password.' });
-        const token = generateToken(admin._id, 'admin'); // Pass the role
-
+        if (!user) {
+         return res.status(404).json({ message: 'Admin not found.' });
+        }    
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ message: 'Incorrect password.' });
+        }
+        const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
         res.status(200).json({ message: 'Admin login successful!', token });
         
         
@@ -158,3 +160,21 @@ app.get('/cadet/dashboard', protect, (req, res) => {
 });
 
 
+// A route to seed the database with an admin user (temporary for testing)
+app.post('/api/admin/seed', async (req, res) => {
+    try {
+        const { username, password, unitName } = req.body;
+        if (!username || !password || !unitName) {
+            return res.status(400).json({ message: 'Please provide all admin details.' });
+        }
+        const adminExists = await Admin.findOne({ username });
+        if (adminExists) {
+            return res.status(409).json({ message: 'Admin already exists.' });
+        }
+        const newAdmin = new Admin({ username, password, unitName });
+        await newAdmin.save();
+        res.status(201).json({ message: 'Admin user created successfully.' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error creating admin user.', error: error.message });
+    }
+});

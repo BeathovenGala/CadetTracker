@@ -15,6 +15,15 @@ const getRoleFromToken = (token) => {
     }
 };
 
+const fetchDashboardData = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      // If there's no token, we can't fetch data.
+      setIsLoading(false);
+      return;
+    }
+};
+
 const CreateParadeForm = ({ onBack, onParadeCreated }) => {
   const { toast } = useToast();
   const [formData, setFormData] = useState({
@@ -275,7 +284,7 @@ const AdminDashboard = ({ onLogout, setView }) => {
         </div>
       );
     };
-
+        
     return renderView();
 };
 
