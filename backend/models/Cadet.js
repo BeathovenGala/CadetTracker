@@ -12,7 +12,7 @@ const CadetSchema=new mongoose.Schema({
         trim:true, //removes whitespace
     },
     regimentalNo:{
-        type:String,
+        type:Number,
         required:true,
         trim:true,
         unique:true,
@@ -31,11 +31,11 @@ const CadetSchema=new mongoose.Schema({
         required: true,
         trim: true,
     },
-    division: {
-        type: String,
-        required: true,
-        trim: true,
-    },
+    // division: {
+    //     type: String,
+    //     required: true,
+    //     trim: true,
+    // },
      gender: {
         type: String,
         required: true,

@@ -16,6 +16,7 @@ const { protect, adminProtect } = require('../utils/authMiddleware.js');
 const cors = require('cors');
 
 
+
 // Importing the routes
 const adminRoutes = require('../routes/admin/adminRoutes');
 const cadetRoutes = require('../routes/cadet/attendanceRoutes');
@@ -30,7 +31,8 @@ const Admin = require('../models/Admin');
 
 // Connecting to mongodb
 const MONGO_URI = process.env.MONGO_URI;
-
+//Connecting to JWT
+const JWT_SECRET = process.env.JWT_SECRET;
 
 const PORT=process.env.PORT || 3000; //declaring constant variable named PORT and process.env is an object that holds users envlironment variables
                                     //Env variables--what it runs on--The program will automatically use that value.
@@ -76,7 +78,7 @@ app.post('/login',async(req,res)=>{
         const cadet= await Cadet.findOne({regimentalNo}); // Use the Mongoose 'findOne' method to search for a cadet by their regimental number.    
 
         if(!cadet){
-             res.status(404).json({message: 'Cadet not found'});
+            return res.status(404).json({message: 'Cadet not found'});
         }     
          //password check
          const isMatch = await bcrypt.compare(password,cadet.password);
@@ -86,7 +88,7 @@ app.post('/login',async(req,res)=>{
                }
                 const token = jwt.sign({ id: cadet._id }, JWT_SECRET, { expiresIn: '1h' });
               // If the cadet is found and the password is correct, send a success message.
-                    res.status(200).json({ message: 'Login successful!', token });//send token back to clinet
+                   return res.status(200).json({ message: 'Login successful!', token });//send token back to clinet
         }
      catch (err) {
         //to handle errors that occur while looking for data within the server
@@ -102,6 +104,7 @@ app.post('/register',async(req,res)=>{
     // console.log('Reistration Succesful.', {cadetData});
     try {
         //get cadet data
+        console.log("Backend data received:", req.body);
         const cadetData= req.body;
         const newCadet= new Cadet(cadetData); // Create a new instance of our Cadet model. The pre-save hook in the model
         // will automatically hash the password before saving.

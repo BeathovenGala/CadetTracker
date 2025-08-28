@@ -1,67 +1,8 @@
 import React, { useState } from 'react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-  Label,
-  Input,
-  Button
-} from './components/ui';
-
-// Mocked shadcn/ui components for a self-contained environment.
-// In a real application, these would be in separate files and imported.
-const Card = ({ children, className }) => (
-  <div className={`bg-white rounded-xl shadow-lg ${className}`}>
-    {children}
-  </div>
-);
-const CardHeader = ({ children, className }) => (
-  <div className={`p-6 ${className}`}>
-    {children}
-  </div>
-);
-const CardTitle = ({ children, className }) => (
-  <h3 className={`text-2xl font-semibold ${className}`}>
-    {children}
-  </h3>
-);
-const CardDescription = ({ children, className }) => (
-  <p className={`text-sm text-gray-500 ${className}`}>
-    {children}
-  </p>
-);
-const CardContent = ({ children, className }) => (
-  <div className={`p-6 ${className}`}>
-    {children}
-  </div>
-);
-const CardFooter = ({ children, className }) => (
-  <div className={`p-6 flex ${className}`}>
-    {children}
-  </div>
-);
-const Label = ({ children, htmlFor }) => (
-  <label htmlFor={htmlFor} className="block text-sm font-medium text-gray-700">
-    {children}
-  </label>
-);
-const Input = ({ className, ...props }) => (
-  <input
-    className={`mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${className}`}
-    {...props}
-  />
-);
-const Button = ({ children, className, variant, ...props }) => (
-  <button
-    className={`inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 ${variant === 'link' ? 'text-blue-600 hover:underline' : 'bg-blue-600 text-white hover:bg-blue-700'} ${className}`}
-    {...props}
-  >
-    {children}
-  </button>
-);
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/card';
+import { Label } from '../components/ui/label';
+import { Input } from '../components/ui/input';
+import { Button } from '../components/ui/button';
 
 export default function LoginPage({ role, setView, onLogin }) {
   const [formData, setFormData] = useState({ regimentalNo: '', username: '', password: '' });
@@ -70,14 +11,24 @@ export default function LoginPage({ role, setView, onLogin }) {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  // A simple function to convert form data types before sending
+const convertData = (data) => {
+    const dataToSend = { ...data };
+    dataToSend.regimentalNo = parseInt(dataToSend.regimentalNo, 10);
+    // Can other conversions here if needed
+    return dataToSend;
+};
+//handleLogin function
+const handleSubmit = (e) => {
     e.preventDefault();
+    const dataToSend = convertData(formData);
+    
     if (role === 'cadet') {
-      onLogin('/login', { regimentalNo: formData.regimentalNo, password: formData.password });
+        onLogin('/login', dataToSend);
     } else {
-      onLogin('/admin/login', { username: formData.username, password: formData.password });
+        onLogin('/admin/login', { username: formData.username, password: formData.password });
     }
-  };
+};
 
   return (
     <Card className="w-full max-w-sm mx-auto">

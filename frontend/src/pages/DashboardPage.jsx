@@ -1,76 +1,9 @@
 import React, { useState, useEffect, createContext, useContext, useCallback } from 'react';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, Button, Label, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/card';
+import { useToast } from '../components/ui/use-toast';
 
-// In a real project, you would import these components from separate files.
-// For a self-contained immersive, we mock them here.
-const Card = ({ children, className }) => <div className={`bg-white rounded-xl shadow-lg ${className}`}>{children}</div>;
-const CardHeader = ({ children, className }) => <div className={`p-6 ${className}`}>{children}</div>;
-const CardTitle = ({ children, className }) => <h3 className={`text-2xl font-semibold ${className}`}>{children}</h3>;
-const CardDescription = ({ children, className }) => <p className={`text-sm text-gray-500 ${className}`}>{children}</p>;
-const CardContent = ({ children, className }) => <div className={`p-6 ${className}`}>{children}</div>;
-const CardFooter = ({ children, className }) => <div className={`p-6 flex ${className}`}>{children}</div>;
-const Label = ({ children, htmlFor }) => <label htmlFor={htmlFor} className="block text-sm font-medium text-gray-700">{children}</label>;
-const Input = ({ className, ...props }) => <input className={`mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${className}`} {...props} />;
-const Button = ({ children, className, variant, ...props }) => <button className={`inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 ${variant === 'link' ? 'text-blue-600 hover:underline' : 'bg-blue-600 text-white hover:bg-blue-700'} ${className}`} {...props}>{children}</button>;
-const Select = ({ onValueChange, children, ...props }) => {
-    const [open, setOpen] = useState(false);
-    const [value, setValue] = useState(props.value || '');
-    return (
-        <div className="relative">
-            <SelectTrigger onClick={() => setOpen(!open)} className="w-full">
-                <SelectValue placeholder={props.placeholder} value={value} />
-            </SelectTrigger>
-            {open && (
-                <SelectContent className="absolute z-10 w-full bg-white border border-gray-200 rounded-md shadow-lg mt-1">
-                    {React.Children.map(children, child =>
-                        React.cloneElement(child, {
-                            onClick: () => {
-                                setValue(child.props.value);
-                                onValueChange(child.props.value);
-                                setOpen(false);
-                            }
-                        })
-                    )}
-                </SelectContent>
-            )}
-        </div>
-    );
-};
-const SelectTrigger = ({ children, onClick, className }) => <button type="button" onClick={onClick} className={`flex items-center justify-between w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${className}`}>{children}</button>;
-const SelectValue = ({ placeholder, value }) => <span>{value || placeholder}</span>;
-const SelectContent = ({ children, className }) => <div className={`py-1 ${className}`}>{children}</div>;
-const SelectItem = ({ value, children, onClick }) => <div onClick={onClick} className="py-2 px-3 text-sm hover:bg-gray-100 cursor-pointer">{children}</div>;
-const Table = ({ children, className }) => <table className={`w-full ${className}`}>{children}</table>;
-const TableBody = ({ children, className }) => <tbody className={className}>{children}</tbody>;
-const TableCell = ({ children, className }) => <td className={`p-2 border-b ${className}`}>{children}</td>;
-const TableHead = ({ children, className }) => <th className={`p-2 border-b text-left font-semibold ${className}`}>{children}</th>;
-const TableHeader = ({ children, className }) => <thead className={className}>{children}</thead>;
-const TableRow = ({ children, className }) => <tr className={className}>{children}</tr>;
-
-// --- Mock Toast functionality ---
-const ToastContext = createContext();
-const useToast = () => useContext(ToastContext);
-const ToastProvider = ({ children }) => {
-  const [toast, setToast] = useState(null);
-  const addToast = useCallback(({ title, description, variant }) => {
-    setToast({ title, description, variant });
-    setTimeout(() => setToast(null), 3000);
-  }, []);
-  return (
-    <ToastContext.Provider value={{ toast: addToast }}>
-      {children}
-      {toast && (
-        <div className={`fixed bottom-4 right-4 p-4 rounded-lg shadow-lg text-white ${toast.variant === 'destructive' ? 'bg-red-500' : 'bg-green-500'}`}>
-          <h4 className="font-bold">{toast.title}</h4>
-          <p className="text-sm">{toast.description}</p>
-        </div>
-      )}
-    </ToastContext.Provider>
-  );
-};
-const Toaster = () => null;
-
-const API_URL = 'http://localhost:3000';
+const API_URL = 'http://localhost:5000';
 
 const getRoleFromToken = (token) => {
     try {
@@ -82,165 +15,271 @@ const getRoleFromToken = (token) => {
     }
 };
 
-// --- View Components ---
-const LoginPage = ({ role, setView, onLogin }) => {
-    const [formData, setFormData] = useState({
-      regimentalNo: '', username: '', password: ''
-    });
+const CreateParadeForm = ({ onBack, onParadeCreated }) => {
+  const { toast } = useToast();
+  const [formData, setFormData] = useState({
+      eventName: '', date: '', latitude: '', longitude: ''
+  });
 
-    const handleChange = (e) => {
-      setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
-
-    const handleSubmit = (e) => {
-      e.preventDefault();
-      if (role === 'cadet') {
-        onLogin('/login', { regimentalNo: formData.regimentalNo, password: formData.password });
-      } else {
-        onLogin('/admin/login', { username: formData.username, password: formData.password });
-      }
-    };
-
-    return (
-      <Card className="w-full max-w-sm mx-auto">
-        <CardHeader>
-          <CardTitle className="text-2xl">{role === 'cadet' ? 'Cadet Login' : 'Admin Login'}</CardTitle>
-          <CardDescription>Enter your credentials to log in.</CardDescription>
-        </CardHeader>
-        <form onSubmit={handleSubmit}>
-          <CardContent className="grid gap-4">
-            {role === 'cadet' ? (
-              <div className="grid gap-2">
-                <Label htmlFor="regimentalNo">Regimental No.</Label>
-                <Input id="regimentalNo" name="regimentalNo" placeholder="Enter regimental number" required onChange={handleChange} />
-              </div>
-            ) : (
-              <div className="grid gap-2">
-                <Label htmlFor="username">Username</Label>
-                <Input id="username" name="username" placeholder="Enter username" required onChange={handleChange} />
-              </div>
-            )}
-            <div className="grid gap-2">
-              <Label htmlFor="password">Password</Label>
-              <Input id="password" name="password" type="password" placeholder="Enter password" required onChange={handleChange} />
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Button className="w-full">Log In</Button>
-          </CardFooter>
-        </form>
-        <div className="flex flex-col items-center p-6 space-y-3">
-          {role === 'cadet' ? (
-            <>
-              <Button variant="link" onClick={() => setView('adminLogin')}>Login as Admin</Button>
-              <p className="text-sm text-gray-500">Don't have an account?</p>
-              <Button variant="link" onClick={() => setView('register')}>Register</Button>
-            </>
-          ) : (
-            <Button variant="link" onClick={() => setView('cadetLogin')}>Back to Cadet Login</Button>
-          )}
-        </div>
-      </Card>
-    );
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-const RegisterPage = ({ setView, onRegister }) => {
-    const [formData, setFormData] = useState({
-      name: '', regimentalNo: '', password: '', unit: '', college: '', gender: '', year: '', enrollmentYear: ''
-    });
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem('token');
+    if (!token) {
+      toast({ title: 'Error', description: 'Not authenticated.', variant: 'destructive' });
+      return;
+    }
 
-    const handleChange = (e) => {
-      setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
+    try {
+        const payload = {
+            eventName: formData.eventName,
+            date: new Date(formData.date),
+            location: {
+                latitude: parseFloat(formData.latitude),
+                longitude: parseFloat(formData.longitude)
+            }
+        };
 
-    const handleSelectChange = (name) => (value) => {
-      setFormData({ ...formData, [name]: value });
-    };
+        const response = await fetch(`${API_URL}/api/admin/parades`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(payload)
+        });
 
-    const handleSubmit = (e) => {
-      e.preventDefault();
-      onRegister(formData);
-    };
+        const result = await response.json();
+        if (response.ok) {
+            toast({ title: 'Success', description: 'Parade created successfully!' });
+            onParadeCreated();
+            onBack();
+        } else {
+            toast({ title: 'Error', description: result.message, variant: 'destructive' });
+        }
+    } catch (error) {
+        toast({ title: 'Error', description: 'Failed to create parade.', variant: 'destructive' });
+    }
+  };
 
-    return (
-      <Card className="w-full max-w-lg mx-auto">
-        <CardHeader>
-          <CardTitle>Register a Cadet</CardTitle>
-          <CardDescription>Fill out the form below to create a new cadet account.</CardDescription>
-        </CardHeader>
-        <form onSubmit={handleSubmit}>
-          <CardContent className="grid gap-4">
+  return (
+    <Card className="w-full max-w-md mx-auto">
+      <CardHeader>
+        <CardTitle>Create a New Parade Event</CardTitle>
+        <CardDescription>Fill out the form below to create a new parade.</CardDescription>
+      </CardHeader>
+      <form onSubmit={handleSubmit}>
+        <CardContent className="grid gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="name">Full Name</Label>
-              <Input id="name" name="name" placeholder="Full Name" required onChange={handleChange} />
+                <Label htmlFor="eventName">Event Name</Label>
+                <Input id="eventName" name="eventName" required onChange={handleChange} />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="regimentalNo">Regimental No.</Label>
-              <Input id="regimentalNo" name="regimentalNo" placeholder="Regimental Number" required onChange={handleChange} />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="password">Password</Label>
-              <Input id="password" name="password" type="password" placeholder="Choose a password" required onChange={handleChange} />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="unit">Unit</Label>
-              <Input id="unit" name="unit" placeholder="Unit Name" required onChange={handleChange} />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="college">College</Label>
-              <Select onValueChange={handleSelectChange('college')} required>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select your College" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="college-a">College A</SelectItem>
-                  <SelectItem value="college-b">College B</SelectItem>
-                  <SelectItem value="college-c">College C</SelectItem>
-                </SelectContent>
-              </Select>
+                <Label htmlFor="date">Date</Label>
+                <Input id="date" name="date" type="date" required onChange={handleChange} />
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="gender">Gender</Label>
-                <Select onValueChange={handleSelectChange('gender')} required>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select SD/SW" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="SD">SD</SelectItem>
-                    <SelectItem value="SW">SW</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="year">Year</Label>
-                <Select onValueChange={handleSelectChange('year')} required>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select Year" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1st Year">1st Year</SelectItem>
-                    <SelectItem value="2nd Year">2nd Year</SelectItem>
-                    <SelectItem value="3rd Year">3rd Year</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+                <div className="grid gap-2">
+                    <Label htmlFor="latitude">Latitude</Label>
+                    <Input id="latitude" name="latitude" type="number" step="any" required onChange={handleChange} />
+                </div>
+                <div className="grid gap-2">
+                    <Label htmlFor="longitude">Longitude</Label>
+                    <Input id="longitude" name="longitude" type="number" step="any" required onChange={handleChange} />
+                </div>
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="enrollmentYear">Enrollment Year</Label>
-              <Input id="enrollmentYear" name="enrollmentYear" type="number" placeholder="e.g., 2024" required onChange={handleChange} />
-            </div>
-          </CardContent>
-          <CardFooter className="flex-col">
-            <Button type="submit" className="w-full">Register</Button>
-            <Button variant="link" className="mt-2" onClick={() => setView('cadetLogin')}>Back to Login</Button>
-          </CardFooter>
-        </form>
-      </Card>
-    );
-  };
+        </CardContent>
+        <CardFooter className="justify-between">
+            <Button variant="outline" onClick={onBack}>Cancel</Button>
+            <Button type="submit">Create Parade</Button>
+        </CardFooter>
+      </form>
+    </Card>
+  );
+};
 
-const DashboardPage = ({ onLogout, role, setView }) => {
+const AdminDashboard = ({ onLogout, setView }) => {
+    const { toast } = useToast();
+    const [parades, setParades] = useState([]);
+    const [paradeDetails, setParadeDetails] = useState(null);
+    const [adminView, setAdminView] = useState('list');
+
+    const fetchParades = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            toast({ title: 'Error', description: 'Not authenticated.', variant: 'destructive' });
+            return;
+        }
+        try {
+            const response = await fetch(`${API_URL}/api/admin/parades`, {
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
+            const result = await response.json();
+            if (response.ok) {
+                setParades(result);
+            } else {
+                toast({ title: 'Error', description: result.message, variant: 'destructive' });
+            }
+        } catch (error) {
+            toast({ title: 'Error', description: 'Failed to fetch parades.', variant: 'destructive' });
+        }
+    };
+
+    const fetchParadeDetails = async (paradeId) => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            toast({ title: 'Error', description: 'Not authenticated.', variant: 'destructive' });
+            return;
+        }
+        try {
+            const response = await fetch(`${API_URL}/api/admin/parades/${paradeId}`, {
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
+            const result = await response.json();
+            if (response.ok) {
+                setParadeDetails(result);
+            } else {
+                toast({ title: 'Error', description: result.message, variant: 'destructive' });
+            }
+        } catch (error) {
+            toast({ title: 'Error', description: 'Failed to fetch parade details.', variant: 'destructive' });
+        }
+    };
+
+    useEffect(() => {
+        fetchParades();
+    }, []);
+
+    const handleSelectParade = (paradeId) => {
+        fetchParadeDetails(paradeId);
+        setAdminView('details');
+    };
+
+    const handleBackToList = () => {
+      setParadeDetails(null);
+      setAdminView('list');
+    };
+
+    const renderView = () => {
+      if (adminView === 'create') {
+        return <CreateParadeForm onBack={handleBackToList} onParadeCreated={fetchParades} />;
+      }
+      if (adminView === 'details' && paradeDetails) {
+        const attendanceData = [
+          { name: 'SD', value: paradeDetails.attendanceStats.totalSDs },
+          { name: 'SW', value: paradeDetails.attendanceStats.totalSWs },
+        ];
+        const collegeData = Object.entries(paradeDetails.attendanceStats.cadetsByCollege).map(([name, value]) => ({ name, value }));
+        const COLORS = ['#4c68d7', '#8a4fe3', '#ffc658', '#ff8042', '#00c49f'];
+
+        return (
+          <div className="p-4">
+              <Button onClick={handleBackToList} variant="outline" className="mb-4">Back to Parades</Button>
+              <Card>
+                  <CardHeader>
+                      <CardTitle className="text-2xl">{paradeDetails.eventName}</CardTitle>
+                      <CardDescription>Date: {new Date(paradeDetails.date).toLocaleDateString()}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="grid gap-4">
+                      <p className="font-semibold">Total Cadets Attended: {paradeDetails.attendanceStats.totalCadets}</p>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="flex flex-col items-center">
+                              <h3 className="text-lg font-semibold">Attendance by Gender</h3>
+                              <ResponsiveContainer width="100%" height={200}>
+                                  <PieChart>
+                                      <Pie data={attendanceData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={60} label>
+                                          {attendanceData.map((entry, index) => (
+                                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                          ))}
+                                      </Pie>
+                                      <Tooltip />
+                                      <Legend />
+                                  </PieChart>
+                              </ResponsiveContainer>
+                          </div>
+                          <div className="flex flex-col items-center">
+                              <h3 className="text-lg font-semibold">Attendance by College</h3>
+                              <ResponsiveContainer width="100%" height={200}>
+                                  <PieChart>
+                                      <Pie data={collegeData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={60} label>
+                                          {collegeData.map((entry, index) => (
+                                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                          ))}
+                                      </Pie>
+                                      <Tooltip />
+                                      <Legend />
+                                  </PieChart>
+                              </ResponsiveContainer>
+                          </div>
+                      </div>
+                      <h3 className="text-lg font-semibold mt-4">Attendees</h3>
+                      <Table>
+                          <TableHeader>
+                              <TableRow>
+                                  <TableHead>Regimental No.</TableHead>
+                                  <TableHead>Name</TableHead>
+                                  <TableHead>College</TableHead>
+                                  <TableHead>Gender</TableHead>
+                              </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                              {paradeDetails.attendees.map(cadet => (
+                                  <TableRow key={cadet.regimentalNo}>
+                                      <TableCell>{cadet.regimentalNo}</TableCell>
+                                      <TableCell>{cadet.name}</TableCell>
+                                      <TableCell>{cadet.college}</TableCell>
+                                      <TableCell>{cadet.gender}</TableCell>
+                                  </TableRow>
+                              ))}
+                          </TableBody>
+                      </Table>
+                  </CardContent>
+              </Card>
+          </div>
+        );
+      }
+      return (
+        <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Admin Dashboard</CardTitle>
+                    <CardDescription>Manage parades and attendance.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Button onClick={() => setAdminView('create')}>Create New Parade</Button>
+                </CardContent>
+                <CardHeader>
+                    <CardTitle>All Parades</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <Select onValueChange={handleSelectParade}>
+                        <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select a parade to view details" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {parades.map(parade => (
+                                <SelectItem key={parade._id} value={parade._id}>
+                                    {parade.eventName} - {new Date(parade.date).toLocaleDateString()}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </CardContent>
+                <CardFooter className="justify-end">
+                    <Button onClick={onLogout}>Logout</Button>
+                </CardFooter>
+            </Card>
+        </div>
+      );
+    };
+
+    return renderView();
+};
+
+const CadetDashboard = ({ onLogout }) => {
     const [dashboardData, setDashboardData] = useState(null);
     const { toast } = useToast();
 
@@ -251,10 +290,8 @@ const DashboardPage = ({ onLogout, role, setView }) => {
             return;
         }
 
-        const path = role === 'admin' ? '/api/admin/parades' : '/api/cadet/dashboard';
-
         try {
-            const response = await fetch(`${API_URL}${path}`, {
+            const response = await fetch(`${API_URL}/api/cadet/dashboard`, {
                 headers: { 'Authorization': `Bearer ${token}` },
             });
             const result = await response.json();
@@ -270,165 +307,42 @@ const DashboardPage = ({ onLogout, role, setView }) => {
 
     useEffect(() => {
         fetchDashboardData();
-    }, [role]);
-
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        onLogout();
-    };
+    }, []);
 
     return (
         <Card className="w-full max-w-md mx-auto p-6">
             <CardHeader>
-                <CardTitle>{role === 'admin' ? 'Admin Dashboard' : 'Cadet Dashboard'}</CardTitle>
-                <CardDescription>
-                    {role === 'admin' ? 'Manage parades and attendance.' : 'Your attendance at a glance.'}
-                </CardDescription>
+                <CardTitle>Cadet Dashboard</CardTitle>
+                <CardDescription>Your attendance at a glance.</CardDescription>
             </CardHeader>
             <CardContent>
                 {dashboardData ? (
                     <div>
-                        {role === 'cadet' ? (
-                            <div>
-                                <h3 className="text-lg font-semibold">Attendance: {dashboardData.attendancePercentage}%</h3>
-                                <div className="mt-4">
-                                    <h4 className="text-md font-medium">Attended Parades</h4>
-                                    <ul className="list-disc list-inside">
-                                        {dashboardData.attendedParades.map(p => (
-                                            <li key={p.eventName}>{p.eventName} ({new Date(p.date).toLocaleDateString()})</li>
-                                        ))}
-                                    </ul>
-                                </div>
-                                <div className="mt-4">
-                                    <h4 className="text-md font-medium">Missed Parades</h4>
-                                    <ul className="list-disc list-inside text-red-500">
-                                        {dashboardData.missedParades.map(p => (
-                                            <li key={p.eventName}>{p.eventName} ({new Date(p.date).toLocaleDateString()})</li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            </div>
-                        ) : (
-                            <div>
-                                <h4 className="text-md font-medium">Parades</h4>
-                                <ul className="list-disc list-inside">
-                                    {dashboardData.map(p => (
-                                        <li key={p._id}>{p.eventName} ({new Date(p.date).toLocaleDateString()})</li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
+                        <h3 className="text-lg font-semibold">Attendance: {dashboardData.attendancePercentage}%</h3>
+                        <div className="mt-4">
+                            <h4 className="text-md font-medium">Attended Parades</h4>
+                            <ul className="list-disc list-inside">
+                                {dashboardData.attendedParades.map(p => (
+                                    <li key={p.eventName}>{p.eventName} ({new Date(p.date).toLocaleDateString()})</li>
+                                ))}
+                            </ul>
+                        </div>
+                        <div className="mt-4">
+                            <h4 className="text-md font-medium">Missed Parades</h4>
+                            <ul className="list-disc list-inside text-red-500">
+                                {dashboardData.missedParades.map(p => (
+                                    <li key={p.eventName}>{p.eventName} ({new Date(p.date).toLocaleDateString()})</li>
+                                ))}
+                            </ul>
+                        </div>
                     </div>
                 ) : (
                     <p>Loading dashboard data...</p>
                 )}
             </CardContent>
-            <CardFooter className="justify-end space-x-2">
-                {role === 'admin' && (
-                    <Button variant="outline" onClick={() => setView('createParade')}>Create Parade</Button>
-                )}
+            <CardFooter className="justify-end">
                 <Button onClick={onLogout}>Logout</Button>
             </CardFooter>
         </Card>
     );
 };
-
-// Main App component to manage state and navigation
-export default function App() {
-  const [view, setView] = useState('cadetLogin');
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userRole, setUserRole] = useState(null);
-  const { toast } = useToast();
-
-  useEffect(() => {
-    const storedToken = localStorage.getItem('token');
-    if (storedToken) {
-        const role = getRoleFromToken(storedToken);
-        if (role) {
-            setIsLoggedIn(true);
-            setUserRole(role);
-            setView('dashboard');
-        } else {
-            localStorage.removeItem('token');
-        }
-    }
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    setIsLoggedIn(false);
-    setUserRole(null);
-    setView('cadetLogin');
-  };
-
-  const handleLogin = async (path, data) => {
-    try {
-      const response = await fetch(`${API_URL}${path}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-
-      const result = await response.json();
-      if (response.ok) {
-        localStorage.setItem('token', result.token);
-        const role = getRoleFromToken(result.token);
-        setIsLoggedIn(true);
-        setUserRole(role);
-        setView('dashboard');
-        toast({ title: "Login Successful", description: result.message });
-      } else {
-        toast({ title: "Login Failed", description: result.message, variant: "destructive" });
-      }
-    } catch (error) {
-      console.error('API Error:', error);
-      toast({ title: "Error", description: "An unexpected error occurred.", variant: "destructive" });
-    }
-  };
-
-  const handleRegister = async (data) => {
-    try {
-      const response = await fetch(`${API_URL}/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-
-      const result = await response.json();
-      if (response.ok) {
-        toast({ title: "Registration Successful", description: result.message });
-        setView('cadetLogin');
-      } else {
-        toast({ title: "Registration Failed", description: result.message, variant: "destructive" });
-      }
-    } catch (error) {
-      console.error('API Error:', error);
-      toast({ title: "Error", description: "An unexpected error occurred.", variant: "destructive" });
-    }
-  };
-
-  const renderView = () => {
-    if (isLoggedIn) {
-      return <DashboardPage onLogout={handleLogout} role={userRole} setView={setView} />;
-    }
-    switch (view) {
-      case 'cadetLogin':
-        return <LoginPage role="cadet" setView={setView} onLogin={handleLogin} />;
-      case 'adminLogin':
-        return <LoginPage role="admin" setView={setView} onLogin={handleLogin} />;
-      case 'register':
-        return <RegisterPage setView={setView} onRegister={handleRegister} />;
-      default:
-        return <LoginPage role="cadet" setView={setView} onLogin={handleLogin} />;
-    }
-  };
-
-  return (
-    <ToastProvider>
-      <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-100">
-        <h1 className="text-3xl font-bold mb-8 text-blue-600">Cadet Tracker</h1>
-        {renderView()}
-      </div>
-    </ToastProvider>
-  );
-}
