@@ -1,25 +1,44 @@
-import React, { useState, createContext, useContext, useCallback } from 'react';
+import * as React from "react";
 
-const ToastContext = createContext();
+const ToastContext = React.createContext();
 
-export const useToast = () => useContext(ToastContext);
+export function ToastProvider({ children }) {
+  const [toasts, setToasts] = React.useState([]);
 
-export const ToastProvider = ({ children }) => {
-  const [toast, setToast] = useState(null);
-  const addToast = useCallback(({ title, description, variant }) => {
-    setToast({ title, description, variant });
-    setTimeout(() => setToast(null), 3000);
-  }, []);
+  const addToast = (message, type = "default") => {
+    setToasts((prev) => [...prev, { id: Date.now(), message, type }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.slice(1));
+    }, 3000);
+  };
 
   return (
-    <ToastContext.Provider value={{ toast: addToast }}>
+    <ToastContext.Provider value={{ addToast }}>
       {children}
-      {toast && (
-        <div className={`fixed bottom-4 right-4 p-4 rounded-lg shadow-lg text-white ${toast.variant === 'destructive' ? 'bg-red-500' : 'bg-green-500'}`}>
-          <h4 className="font-bold">{toast.title}</h4>
-          <p className="text-sm">{toast.description}</p>
-        </div>
-      )}
+      <div className="fixed bottom-4 right-4 space-y-2 z-50">
+        {toasts.map((toast) => (
+          <div
+            key={toast.id}
+            className={`px-4 py-2 rounded shadow text-white ${
+              toast.type === "error"
+                ? "bg-red-500"
+                : toast.type === "success"
+                ? "bg-green-500"
+                : "bg-gray-800"
+            }`}
+          >
+            {toast.message}
+          </div>
+        ))}
+      </div>
     </ToastContext.Provider>
   );
-};
+}
+
+export function useToast() {
+  const context = React.useContext(ToastContext);
+  if (!context) {
+    throw new Error("useToast must be used inside a ToastProvider");
+  }
+  return context;
+}

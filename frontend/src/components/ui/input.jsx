@@ -1,9 +1,13 @@
+import * as React from 'react';
+import { cn } from "../../lib/utils"
 
-import React from 'react';
-
-export const Input = ({ className, ...props }) => (
-    <input
-        className={`mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${className}`}
-        {...props}
-    />
-);
+export const Input = React.forwardRef(({ className, ...props }, ref) => (
+  <input
+    ref={ref}
+    className={cn(
+      "flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+      className
+    )}
+    {...props}
+  />
+));

@@ -1,7 +1,10 @@
-import React from 'react';
+import * as React from 'react';
+import { cn } from "../../lib/utils"
 
-export const Label = ({ children, htmlFor }) => (
-    <label htmlFor={htmlFor} className="block text-sm font-medium text-gray-700">
-        {children}
-    </label>
-);
+export const Label = React.forwardRef(({ className, ...props }, ref) => (
+  <label
+    ref={ref}
+    className={cn('block text-sm font-medium', className)}
+    {...props}
+  />
+));
