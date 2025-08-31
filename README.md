@@ -8,21 +8,21 @@ Cadet Tracker is a modern, secure, and intuitive attendance and event management
 
 ## 🌟 The Spark: Solving a Real-World Problem
 
-**Cadet Tracker** was born from a frustrating, real-world problem I faced every week.[1] In an organization with over 1.7 million cadets, a manual system with a pen and paper was used to track attendance. Every Saturday, around 120 cadets would come for training, and the process was slow and tedious. Taking roll call, transferring data to a ledger, and then manually verifying attendance records for eligibility—it was inefficient and error-prone. What's more, there was no real-time way to give a total count before a parade could start.
+**Cadet Tracker** was born from a frustrating, real-world problem I faced every week. In an organization with over 1.7 million cadets, a manual system with a pen and paper was used to track attendance. Every Saturday, around 120 cadets would come for training, and the process was slow and tedious. Taking roll call, transferring data to a ledger, and then manually verifying attendance records for eligibility—it was inefficient and error-prone. What's more, there was no real-time way to give a total count before a parade could start.
 
-The idea for Cadet Tracker was simple: replace this outdated, manual process with a modern, secure, and intuitive digital platform. This project isn't just about building an application; it's a blueprint of my development journey, from identifying a genuine need to architecting a functional solution that tackles the practical challenges head-on.[1]
+The idea for Cadet Tracker was simple: replace this outdated, manual process with a modern, secure, and intuitive digital platform. This project isn't just about building an application; it's a blueprint of my development journey, from identifying a genuine need to architecting a functional solution that tackles the practical challenges head-on. 
 
 ## 💻 The Tech: A Deep Dive into the Code's Value
 
-This project was a full-stack challenge, designed to be both robust and scalable in the future. Here’s a look under the hood at the technical decisions that matter most for a Minimum Viable Product (MVP).[1]
+This project was a full-stack challenge, designed to be both robust and scalable in the future. Here’s a look under the hood at the technical decisions that matter most for a Minimum Viable Product (MVP). 
 
 ### Architecture & Technology Stack
 
-This is a full-stack application with a clear separation between the frontend and backend. We chose a Node.js backend because it's lightweight and efficient for building the RESTful API.[2] The database is MongoDB, a flexible NoSQL database that's perfect for a project where the data schema might evolve.[2] The frontend is built with vanilla HTML, CSS, and JavaScript, ensuring a low-overhead, fast user interface.
+This is a full-stack application with a clear separation between the frontend and backend. We chose a Node.js backend because it's lightweight and efficient for building the RESTful API.  The database is MongoDB, a flexible NoSQL database that's perfect for a project where the data schema might evolve.  The frontend is built with vanilla HTML, CSS, and JavaScript, ensuring a low-overhead, fast user interface.
 
   * **Backend:** Node.js with Express.js for a robust and scalable API.
   * **Database:** MongoDB, with Mongoose for schema management.
-  * **Security:** JSON Web Tokens (JWT) for secure user sessions and `bcrypt` for one-way password hashing.[1]
+  * **Security:** JSON Web Tokens (JWT) for secure user sessions and `bcrypt` for one-way password hashing. 
   * **QR Codes:** The `uuid` library for generating unique, single-use identifiers for attendance.
 
 ### Why this stack?
@@ -95,7 +95,7 @@ The project requires both the database and the backend server to be running befo
 
 A project's true value isn't just in the final code, but in the lessons learned along the way. This project is an opportunity for you to follow along with my development journey. I took notes on the challenges I faced and the solutions I found.
 
-Below is a detailed `Log of Learnings` that chronicles my journey. You can also use the `git` commit history to see how the project evolved over time.[3] A good `git` log can guide you by including bug fixes and upgrades as they happened. You can compare different versions of the code to see what changed at each step, and by looking at the messages, you can understand the reasoning behind each change, as a `git` commit is a snapshot of the files at a specific moment.[4]
+Below is a detailed `Log of Learnings` that chronicles my journey. You can also use the `git` commit history to see how the project evolved over time.  A good `git` log can guide you by including bug fixes and upgrades as they happened. You can compare different versions of the code to see what changed at each step, and by looking at the messages, you can understand the reasoning behind each change, as a `git` commit is a snapshot of the files at a specific moment. 
 
 Here is a log of each step, including the functionality added, what I learned, and how I resolved errors.
 
@@ -124,14 +124,14 @@ Here is a log of each step, including the functionality added, what I learned, a
 
 ## 🔭 The Future: A Strategic Roadmap
 
-The vision for Cadet Tracker extends far beyond its current state. I believe this project has the potential for real-world adoption, and a strong roadmap is essential for making that happen.[1]
+The vision for Cadet Tracker extends far beyond its current state. I believe this project has the potential for real-world adoption, and a strong roadmap is essential for making that happen. 
 
-  * **Dynamic Attendance:** We plan to implement a dynamic, one-time scannable QR code for each cadet with auto-scroll to prevent sharing and GPS spoofing. This would be a major leap in security and data integrity.[1]
-  * **Email Verification:** Implement a system to send a verification email to new registrants via their unit's official mail.[1]
-  * **Automated Verification:** The system could automatically determine a cadet's enrollment year and eligibility based on their entry date and exam schedule.[1]
+  * **Dynamic Attendance:** We plan to implement a dynamic, one-time scannable QR code for each cadet with auto-scroll to prevent sharing and GPS spoofing. This would be a major leap in security and data integrity. 
+  * **Email Verification:** Implement a system to send a verification email to new registrants via their unit's official mail. 
+  * **Automated Verification:** The system could automatically determine a cadet's enrollment year and eligibility based on their entry date and exam schedule. 
   * **Wider Adoption:** Expand the application to support schools in addition to colleges.
-  * **Communication Channel:** The cadet dashboard will include a real-time communication channel to deliver messages about ongoing parades and events.[1]
-  * **Rank Holder Display:** Display a list of college rank holders with their explicit consent.[1]
+  * **Communication Channel:** The cadet dashboard will include a real-time communication channel to deliver messages about ongoing parades and events. 
+  * **Rank Holder Display:** Display a list of college rank holders with their explicit consent. 
   * **Camps Attendance:** The system could be expanded to handle large events where hundreds of cadets attend and attendance needs to be taken twice a day.
 
 ## 🤝 How to Contribute
